@@ -9,7 +9,9 @@
 import UIKit
 import Parse
 
-class ChatViewController: UIViewController {
+var messages: [PFObject]!
+
+class ChatViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
   
   @IBOutlet weak var messageTable: UITableView!
   @IBOutlet weak var messageBox: UITextView!
@@ -18,6 +20,10 @@ class ChatViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+    
+    let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LoginViewController.dismissKeyboard))
+    view.addGestureRecognizer(tap)
+  
   }
 
   override func didReceiveMemoryWarning() {
@@ -30,6 +36,8 @@ class ChatViewController: UIViewController {
     
     if messageBox.text != "" {
       message["text"] = messageBox.text
+      message["user"] = PFUser.current()
+      
       message.saveInBackground(){
         (succeeded: Bool?, error: Error?) -> Void in
         if error != nil {
@@ -45,6 +53,29 @@ class ChatViewController: UIViewController {
     }
   }
 
+  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    if messages != nil {
+      return messages.count
+    }
+    else {
+      return 0
+    }
+  }
+  
+  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    let cell = messageTable.dequeueReusableCell(withIdentifier: "mesCell") as! MessageViewCell
+    let corMes = messages[indexPath.row]
+    let realMes = corMes["text"]
+    let user = corMes["user"] as! PFUser
+    cell.mesLabel.text = realMes as! String
+    
+    return cell
+  }
+  
+  // dismisses keyboard
+  func dismissKeyboard() {
+    view.endEditing(true)
+  }
     /*
     // MARK: - Navigation
 
