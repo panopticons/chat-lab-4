@@ -7,20 +7,43 @@
 //
 
 import UIKit
+import Parse
 
 class ChatViewController: UIViewController {
-
-    override func viewDidLoad() {
+  
+  @IBOutlet weak var messageTable: UITableView!
+  @IBOutlet weak var messageBox: UITextView!
+  
+  override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-    }
+  }
 
-    override func didReceiveMemoryWarning() {
+  override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-    }
+  }
     
+  @IBAction func sendMessage(_ sender: UIButton) {
+    let message = PFObject(className: "Message")
+    
+    if messageBox.text != "" {
+      message["text"] = messageBox.text
+      message.saveInBackground(){
+        (succeeded: Bool?, error: Error?) -> Void in
+        if error != nil {
+          
+        }
+        else {
+          print("Saved")
+        }
+      }
+    }
+    else {
+      
+    }
+  }
 
     /*
     // MARK: - Navigation
