@@ -24,33 +24,41 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
     let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LoginViewController.dismissKeyboard))
     view.addGestureRecognizer(tap)
   
+    messageTable.delegate = self
+    messageTable.dataSource = self
+    messageTable.rowHeight = UITableViewAutomaticDimension
+    messageTable.estimatedRowHeight = 45
+    
+    Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(onTimer), userInfo: nil, repeats: true)
   }
 
   override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
   }
-    
+  
+  // send message function
   @IBAction func sendMessage(_ sender: UIButton) {
-    let message = PFObject(className: "Message")
+    var message = PFObject(className: "Message")
     
-    if messageBox.text != "" {
-      message["text"] = messageBox.text
+    //if messageBox.text != "" {
+      message["text"] = messageBox.text!
       message["user"] = PFUser.current()
       
       message.saveInBackground(){
         (succeeded: Bool?, error: Error?) -> Void in
         if error != nil {
-          
+          //
         }
         else {
           print("Saved")
+          print(self.messageBox.text)
         }
       }
-    }
-    else {
+    //}
+    //else {
       
-    }
+    //}
   }
 
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -65,11 +73,38 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = messageTable.dequeueReusableCell(withIdentifier: "mesCell") as! MessageViewCell
     let corMes = messages[indexPath.row]
-    let realMes = corMes["text"]
+    let realMes = corMes["text"] as! String
     let user = corMes["user"] as! PFUser
-    cell.mesLabel.text = realMes as! String
+    
+    if user.username != nil {
+      cell.mesLabel.text = "\(user.username!): \(realMes)"
+    }
+    else {
+      cell.mesLabel.text = "\(realMes)"
+    }
     
     return cell
+  }
+  
+  func onTimer()
+  {
+    var query = PFQuery(className: "Message")
+    
+    query.order(byDescending: "createdAt")
+    
+    query.includeKey("text")
+    query.includeKey("user")
+    
+    query.findObjectsInBackground { (objects: [PFObject]?, error: Error?) in
+      if error == nil {
+        if let objects = objects {
+          messages = objects
+        }
+      } else {
+        //
+      }
+    }
+    messageTable.reloadData()
   }
   
   // dismisses keyboard
