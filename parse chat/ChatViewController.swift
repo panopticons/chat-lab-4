@@ -73,11 +73,11 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = messageTable.dequeueReusableCell(withIdentifier: "mesCell") as! MessageViewCell
     let corMes = messages[indexPath.row]
-    let realMes = corMes["text"] as! String
-    let user = corMes["user"] as! PFUser
+    let realMes = corMes["text"] as? String
+    let user = corMes["user"] as? PFUser
     
-    if user.username != nil {
-      cell.mesLabel.text = "\(user.username!): \(realMes)"
+    if user?.username != nil {
+      cell.mesLabel.text = "\(user?.username!): \(realMes)"
     }
     else {
       cell.mesLabel.text = "\(realMes)"
